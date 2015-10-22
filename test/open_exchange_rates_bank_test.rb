@@ -57,6 +57,11 @@ describe Money::Bank::OpenExchangeRatesBank do
         subject.exchange_with(money, 'USD').must_equal Money.new(100, 'USD')
       end
 
+      it 'should be able to exchange from two other currencies through USD' do
+        money = Money.new(200, 'BBD')
+        subject.exchange_with(money, 'YER').must_equal Money.new(21504, 'YER')
+      end
+
       it "should raise if it can't find an exchange rate" do
         money = Money.new(0, 'USD')
         proc { subject.exchange_with(money, 'SSP') }

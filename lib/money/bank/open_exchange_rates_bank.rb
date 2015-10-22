@@ -23,6 +23,8 @@ class Money
       SECURE_OER_URL = OER_URL.gsub('http:', 'https:')
       SECURE_OER_HISTORICAL_URL = OER_URL.gsub('http:', 'https:')
 
+      BASE_CURRENCY = "USD"
+
       # use https to fetch rates from Open Exchange Rates
       # disabled by default to support free-tier users
       attr_accessor :secure_connection
@@ -69,8 +71,8 @@ class Money
           rate = exchange_rate.last
           currency = exchange_rate.first
           next unless Money::Currency.find(currency)
-          set_rate('USD', currency, rate)
-          set_rate(currency, 'USD', 1.0 / rate)
+          set_rate(BASE_CURRENCY, currency, rate)
+          set_rate(currency, BASE_CURRENCY, 1.0 / rate)
         end
       end
 
@@ -93,7 +95,12 @@ class Money
       # @return [Numeric] rate.
       def get_rate(from_currency, to_currency, opts = {})
         expire_rates
-        super
+
+        if [from_currency, to_currency].include?(BASE_CURRENCY)
+          super
+        else
+          1.0 * super(from_currency, BASE_CURRENCY) * super(BASE_CURRENCY, to_currency)
+        end
       end
 
       # Expire rates when expired
